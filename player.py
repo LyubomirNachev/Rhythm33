@@ -17,7 +17,9 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.textinput import TextInput
 
 Window.size = (400, 600)
+global song_number
 song_number = 0
+
 class MusicApp(MDApp):
     def build(self):
 
@@ -80,16 +82,20 @@ class MusicApp(MDApp):
                                        on_press = self.stopaudio, disabled = True)
 
         self.nextbutton = MDIconButton(pos_hint={'center_x':0.725,'center_y':0.05},
-                                       icon = 'next.png')
+                                       icon = 'next.png',
+                                       on_press = self.nextsong)
 
         self.prevbutton = MDIconButton(pos_hint={'center_x': 0.275, 'center_y': 0.05},
-                                       icon='prev.png')
+                                       icon='prev.png',
+                                       on_press = self.prevsong)
 
         self.shufflebutton = MDIconButton(pos_hint={'center_x': 0.890, 'center_y': 0.05},
-                                          icon='shuffle.png')
+                                          icon='shuffle.png',
+                                          on_press = self.shuffle)
 
         self.loopbutton = MDIconButton(pos_hint={'center_x': 0.1, 'center_y': 0.05},
-                                          icon='loop.png')
+                                       icon='loop.png',
+                                       on_press = self.loop)
 
 
         layout.add_widget(self.playbutton)
@@ -108,6 +114,7 @@ class MusicApp(MDApp):
         layout.add_widget(self.submit)
 
         Clock.schedule_once(self.playaudio)
+
 
         return layout
 
@@ -135,7 +142,9 @@ class MusicApp(MDApp):
         self.totaltime.text = "00:00"
         self.songImage.source = "pause.png"
     def nextsong(self, obj):
-        song_number =+ 1
+        self.sound.stop()
+        global song_number
+        song_number = song_number + 1
         if song_number == self.song_count:
             song_number = 0
         self.song_title = self.song_list[song_number]
@@ -148,9 +157,11 @@ class MusicApp(MDApp):
         self.progressbarEvent = Clock.schedule_interval(self.updatepbar,self.sound.length/100)
         self.setttimeEvent = Clock.schedule_interval(self.settime,1)
     def prevsong(self, obj):
-        song_number =- 1
-        if song_number == 0:
-            song_number = self.song_count
+        self.sound.stop()
+        global song_number
+        song_number = song_number - 1
+        if song_number == -1:
+            song_number = self.song_count - 1
         self.song_title = self.song_list[song_number]
         self.sound = SoundLoader.load('{}/{}'.format(self.music_dir,self.song_title))
 
@@ -161,6 +172,7 @@ class MusicApp(MDApp):
         self.progressbarEvent = Clock.schedule_interval(self.updatepbar,self.sound.length/100)
         self.setttimeEvent = Clock.schedule_interval(self.settime,1)
     def shuffle(self, obj):
+        self.sound.stop()
         self.song_title = self.song_list[random.randrange(0, self.song_count)]
         self.sound = SoundLoader.load('{}/{}'.format(self.music_dir, self.song_title))
 
